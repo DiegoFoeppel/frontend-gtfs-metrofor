@@ -1,13 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
-import { getRoutes, getRoutesAndStops } from "../services/routesService";
-import { getStopTimetables } from "@/services/stopsService";
+import { getStops, getStopTimetables } from "@/services/stopsService";
 
 export const useStops = () =>
-  useQuery({ queryKey: ["stations"], queryFn: getRoutesAndStops });
+  useQuery({ queryKey: ["stops"], queryFn: getStops });
 
-export const useStopsTimetables = (stopId: string) => {
+export const useStopsTimetables = (
+  stopId: string | null,
+  directionId?: number,
+) => {
   return useQuery({
-    queryKey: ["stations", stopId],
-    queryFn: () => getStopTimetables(stopId),
+    queryKey: ["stops-timetable", stopId, directionId],
+    queryFn: () => getStopTimetables(stopId!, directionId),
+    enabled: !!stopId,
   });
 };

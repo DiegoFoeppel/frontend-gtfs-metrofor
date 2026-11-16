@@ -1,0 +1,86 @@
+[
+  {
+    "route_id": "7",
+    "agency_id": "1",
+    "route_short_name": null,
+    "route_long_name": "Vlt Aeroporto",
+    "route_desc": "Expedicionários - Aeroporto",
+    "route_type": 0,
+    "route_url": "https://www.metrofor.ce.gov.br",
+    "route_color": "5b54a4",
+    "route_text_color": "FFFFFF",
+    "city_id": "1"
+  },
+  {
+    "route_id": "6",
+    "agency_id": "1",
+    "route_short_name": null,
+    "route_long_name": "Vlt Cariri",
+    "route_desc": "Fátima - Crato",
+    "route_type": 0,
+    "route_url": "https://www.metrofor.ce.gov.br/vlt-cariri/",
+    "route_color": "039d56",
+    "route_text_color": "FFFFFF",
+    "city_id": "3"
+  },
+  {
+    "route_id": "4",
+    "agency_id": "1",
+    "route_short_name": null,
+    "route_long_name": "Vlt Sobral - Linha Norte",
+    "route_desc": "Novo Recanto - Cohab III",
+    "route_type": 0,
+    "route_url": "https://www.metrofor.ce.gov.br/vlt-sobral/",
+    "route_color": "547fc0",
+    "route_text_color": "FFFFFF",
+    "city_id": "2"
+  },
+  {
+    "route_id": "5",
+    "agency_id": "1",
+    "route_short_name": null,
+    "route_long_name": "Vlt Sobral - Linha Sul",
+    "route_desc": "Sumaré - Cohab II",
+    "route_type": 0,
+    "route_url": "https://www.metrofor.ce.gov.br/vlt-sobral/",
+    "route_color": "db4535",
+    "route_text_color": "FFFFFF",
+    "city_id": "2"
+  },
+  {
+    "route_id": "3",
+    "agency_id": "1",
+    "route_short_name": null,
+    "route_long_name": "Linha Nordeste",
+    "route_desc": "Parangaba - Mucuripe",
+    "route_type": 0,
+    "route_url": "https://www.metrofor.ce.gov.br/linhanordeste/",
+    "route_color": "5b54a4",
+    "route_text_color": "FFFFFF",
+    "city_id": "1"
+  },
+  {
+    "route_id": "2",
+    "agency_id": "1",
+    "route_short_name": null,
+    "route_long_name": "Linha Oeste",
+    "route_desc": "Caucaia - Fortaleza",
+    "route_type": 0,
+    "route_url": "https://www.metrofor.ce.gov.br/linha-oeste/",
+    "route_color": "a6ce39",
+    "route_text_color": "FFFFFF",
+    "city_id": "1"
+  },
+  {
+    "route_id": "1",
+    "agency_id": "1",
+    "route_short_name": null,
+    "route_long_name": "Linha Sul",
+    "route_desc": "Pacatuba/Maracanaú - Fortaleza",
+    "route_type": 1,
+    "route_url": "https://www.metrofor.ce.gov.br/linha-sul-5/",
+    "route_color": "ed1c24",
+    "route_text_color": "FFFFFF",
+    "city_id": "1"
+  }
+]
