@@ -1,45 +1,39 @@
 import {
-  Map,
   MapMarker,
   MarkerContent,
   MarkerTooltip,
   MapRoute,
 } from "@/components/ui/map";
-import { TramFrontIcon } from "lucide-react";
+import { TramPin } from "./TramPin";
 
-// const route = [
-//   [-74.006, 40.7128], // NYC City Hall
-//   [-73.9857, 40.7484], // Empire State Building
-//   [-73.9772, 40.7527], // Grand Central
-//   [-73.9654, 40.7829], // Central Park
-// ] as [number, number][];
-
-// const stops = [
-//   { name: "City Hall", lng: -74.006, lat: 40.7128 },
-//   { name: "Empire State Building", lng: -73.9857, lat: 40.7484 },
-//   { name: "Grand Central Terminal", lng: -73.9772, lat: 40.7527 },
-//   { name: "Central Park", lng: -73.9654, lat: 40.7829 },
-// ];
-
-export function RouteExample({ routes, stops, onStopClick }) {
-  console.log("routes", routes);
+export function RouteExample({
+  routes,
+  stops,
+  onStopClick,
+  onLineClick,
+  active,
+}) {
+  console.log("routes sda", routes);
   return (
     <>
       {routes.length > 0 &&
         routes.map((line) => {
           console.log("line", line);
-          const coords = line.coordinates.map((item) => [
-            item.longitude,
-            item.latitude,
-          ]);
+          const coords = line.geometry.coordinates;
+          const id = line.id;
+          const color = line.properties.color;
 
           return (
             <MapRoute
-              key={line.id}
+              key={id}
+              onClick={() => onLineClick(line)}
               coordinates={coords}
-              color={`#${line.routeColor}`}
-              width={4}
-              opacity={0.8}
+              color={line.properties.color}
+              width={6}
+              opacity={1}
+              // opacity={active ? 0.35 : 1}
+              // active={id === active}
+              // activeOpacity={1}
             />
           );
         })}
@@ -50,15 +44,25 @@ export function RouteExample({ routes, stops, onStopClick }) {
             key={stop.stopId}
             longitude={stop.stopLon}
             latitude={stop.stopLat}
-            onClick={() => onStopClick(stop)}
+            // onClick={() => onStopClick(stop)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onStopClick(stop);
+            }}
           >
             <MarkerContent>
-              <div className='flex size-5 p-1 items-center justify-center rounded-full border-2 border-white bg-black text-xs font-semibold text-white shadow-lg'>
-                {/* {index + 1} */}
-                <TramFrontIcon size={16} />
-              </div>
+              {/* <div className='flex size-5  items-center justify-center rounded-full border-2 border-white bg-white text-xs font-semibold text-black shadow-lg'> */}
+              {/* {index + 1} */}
+              <TramPin active={false} />
+              {/* </div> */}
             </MarkerContent>
-            <MarkerTooltip>{stop.stopName}</MarkerTooltip>
+            <MarkerTooltip>
+              <div className='flex flex-col'>
+                <span>Estação{stop.stopName}</span>
+                <span>Lng: {stop.stopLon}</span>
+                <span>Lat: {stop.stopLat}</span>
+              </div>
+            </MarkerTooltip>
           </MapMarker>
         ))}
     </>

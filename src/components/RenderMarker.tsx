@@ -3,11 +3,8 @@ import { Marker, Tooltip } from "react-leaflet";
 import { getStopTimetables } from "../services/stopsService";
 export const RenderMarker = ({ stops }: { stops: Stop[] }) => {
   const handleStopClick = async (stop) => {
-    console.log("data", stop);
     try {
       const data = await getStopTimetables(stop.stopId);
-
-      console.log("data", data);
     } catch (err) {
       console.log("err", err);
     }

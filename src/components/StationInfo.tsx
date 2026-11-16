@@ -1,6 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Sheet,
   SheetClose,
@@ -9,23 +7,20 @@ import {
   SheetFooter,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from "@/components/ui/sheet";
 import { useStopsTimetables } from "@/hooks/stops";
+import type { StopProps, Timetable } from "@/types";
 import { LoaderPinwheel } from "lucide-react";
 
-export function StationInfo({ stop, onOpenChange }) {
-  console.log("stop", stop);
-
-  const { data, isLoading, error } = useStopsTimetables(stop.stopId);
+export function StopInfo({ stop, onOpenChange }: StopProps) {
+  const { data, isLoading } = useStopsTimetables(stop.stopId);
 
   if (isLoading) {
     return <LoaderPinwheel />;
   }
 
-  console.log("data", data);
-
-  const timetables = data.timetables;
+  // const timetables = data.timetables;
+  const timetables = data?.timetables ?? [];
 
   return (
     <Sheet open={!!stop} onOpenChange={onOpenChange}>
@@ -40,13 +35,13 @@ export function StationInfo({ stop, onOpenChange }) {
 
         <div className='overflow-y-auto'>
           {timetables.length > 0 &&
-            timetables.map((group, index) => (
+            timetables.map((group: Timetable, index: number) => (
               <div className='mb-2 px-4' key={index}>
                 <h1 className='font-bold text-lg mt-3 mb-1.5'>
                   Sentido {group.sentido}
                 </h1>
                 <div className='grid grid-cols-4 text-center gap-2'>
-                  {group.horarios.map((hora) => (
+                  {group.horarios.map((hora: string) => (
                     <p className='rounded-md border text-md p-2' key={hora}>
                       {hora}
                     </p>
@@ -65,4 +60,4 @@ export function StationInfo({ stop, onOpenChange }) {
   );
 }
 
-export default StationInfo;
+export default StopInfo;
