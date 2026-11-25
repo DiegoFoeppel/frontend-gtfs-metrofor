@@ -1,24 +1,33 @@
-import type { FeatureCollection, LineString, MultiLineString } from "geojson";
 import fortaleza from "./fortaleza.json";
 import sobral from "./sobral.json";
 import cariri from "./cariri.json";
 
-type LineProperties = {
-  routeId: string;
-  name: string;
-  color: string;
-  city: string;
+export type Props = {
+  lineCoords: [number, number][] | null; // [lng, lat], da linha selecionada
+  cityView: { center: [number, number]; zoom: number };
 };
 
-type LinesCollection = FeatureCollection<
-  LineString | MultiLineString,
-  LineProperties
->;
+export const inactiveOpacity = 0.35;
+
+export const cityView = {
+  center: [-38.565, -3.8] as [number, number],
+  zoom: 11.5,
+};
+
+
 
 export const allLines = {
   type: "FeatureCollection",
   features: [...fortaleza.features, ...sobral.features, ...cariri.features],
 };
+
+// type CityOption = {
+//   city: {
+//     center: [number, number],
+//     zoom: number,
+//     geojson:
+//   }
+// }
 
 export const cities = {
   fortaleza: {
@@ -28,7 +37,7 @@ export const cities = {
   },
   sobral: {
     center: [-40.35, -3.69],
-    zoom: 13,
+    zoom: 13.5,
     geojson: sobral,
   },
   cariri: {

@@ -1,92 +1,100 @@
-import { useMemo, useState } from "react";
-
-import { Button } from "./ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "./ui/select";
-
-import { selectCities } from "@/data";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "./ui/command";
+import { useState, type ReactNode } from "react";
 import { X } from "lucide-react";
 import { cn } from "cn";
-import { ModeToggle } from "./mode-toggle";
-import { ThemeToggle } from "./theme-toggle";
+import { StopContent } from "./StationInfo";
+import LineInfo from "./LineInfo";
+import ListContent from "./ListContent";
+import { Button } from "./ui/button";
+import { Drawer, DrawerContent, DrawerTitle } from "./ui/drawer";
+import { useIsMobile } from "@/hooks/use-mobile";
+import type { City, CompleteRoute, Stop } from "@/types";
 
-const normalize = (s: string) =>
-  s
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "")
-    .toLowerCase();
+type Props = {
+  city: City;
+  onCityChange: (city: City) => void;
+  routes: CompleteRoute[];
+  stops: Stop[];
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSelectRoute: (line: CompleteRoute) => void;
+  onSelectStop: (stop: Stop) => void;
+  stop: Stop | null;
+  line: CompleteRoute | null;
+  clearStop: () => void;
+  clearLine: () => void;
+};
 
-const AppSidebar = ({
-  city,
-  onCityChange,
-  routes,
-  open,
-  onOpenChange,
-  stops,
-  onSelectRoute,
-  onSelectStop,
-}) => {
-  const [query, setQuery] = useState("");
-  const q = normalize(query.trim());
+// Snap points do bottom sheet (estilo CityMapper): só o topo, metade, quase tela cheia.
+const PEEK = "132px";
+const HALF = 0.5;
+const FULL = 0.92;
+const SNAP_POINTS = [PEEK, HALF, FULL];
 
-  const filteredRoutes = useMemo(
-    () =>
-      q
-        ? routes.filter((r) => normalize(r.properties.name).includes(q))
-        : routes,
-    [routes, q],
+const AppSidebar = ({ open, onOpenChange, ...content }: Props) => {
+  const isMobile = useIsMobile();
+  const [snap, setSnap] = useState<string | number | null>(HALF);
+
+  // Sincroniza o snap quando o pai abre/fecha o painel (ex.: tocar numa estação no mapa).
+  const [prevOpen, setPrevOpen] = useState(open);
+  if (open !== prevOpen) {
+    setPrevOpen(open);
+    setSnap(open ? (snap === PEEK ? HALF : snap) : PEEK);
+  }
+
+  const body: ReactNode = content.stop ? (
+    <StopContent stop={content.stop} clearStop={content.clearStop} />
+  ) : content.line ? (
+    <LineInfo line={content.line} clearLine={content.clearLine} />
+  ) : (
+    <ListContent
+      city={content.city}
+      routes={content.routes}
+      stops={content.stops}
+      onSelectRoute={content.onSelectRoute}
+      onSelectStop={content.onSelectStop}
+      onCityChange={content.onCityChange}
+    />
   );
 
-  const filteredStops = useMemo(() => {
-    if (!q) return [];
-    return stops
-      .filter(
-        (s) =>
-          normalize(s.stopName).includes(q) ||
-          s.stopCode.toLowerCase().includes(q),
-      )
-      .slice(0, 20);
-  }, [stops, q]);
+  if (isMobile) {
+    return (
+      <Drawer
+        open
+        modal={false}
+        disablePointerDismissal
+        showSwipeHandle
+        snapPoints={SNAP_POINTS}
+        snapPoint={snap}
+        onSnapPointChange={(next) => {
+          setSnap(next);
+          setPrevOpen(next !== PEEK);
+          onOpenChange(next !== PEEK);
+        }}
+      >
+        <DrawerContent aria-label='Linhas e estações' className='shadow-2xl'>
+          <DrawerTitle className='sr-only'>Linhas e estações</DrawerTitle>
+          {/* O popup tem 100dvh; só a parte acima do offset do snap é visível. */}
+          <div
+            className='flex min-h-0 flex-col gap-3 px-4 pt-1 pb-[max(1rem,env(safe-area-inset-bottom))]'
+            style={{ height: "calc(100dvh - var(--drawer-snap-point-offset, 0px))" }}
+          >
+            {body}
+          </div>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
 
   return (
     <aside
+      aria-label='Painel de linhas e estações'
+      inert={!open}
       className={cn(
-        "absolute left-0 top-0 z-10 flex h-full w-80 flex-col gap-3 border-r bg-background p-4 shadow-xl transition-transform",
+        "absolute inset-y-0 left-0 z-10 flex w-96 flex-col gap-3 border-r bg-background p-4 shadow-xl transition-transform duration-300",
         !open && "-translate-x-full",
       )}
     >
-      <div className='flex items-center gap-2'>
-        <Select items={selectCities} value={city} onValueChange={onCityChange}>
-          <SelectTrigger className='w-full'>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Cidade</SelectLabel>
-              {selectCities.map((item) => (
-                <SelectItem key={item.id} value={item.value}>
-                  {item.label}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-
+      <div className='flex shrink-0 justify-end'>
         <Button
           size='icon'
           variant='ghost'
@@ -96,62 +104,7 @@ const AppSidebar = ({
           <X />
         </Button>
       </div>
-
-      {/* <ModeToggle /> */}
-      <ThemeToggle />
-      <Command shouldFilter={false} className='min-h-0 flex-1 bg-transparent'>
-        <CommandInput
-          placeholder='Buscar linha ou estação...'
-          value={query}
-          onValueChange={setQuery}
-        />
-        <CommandList className='max-h-none flex-1'>
-          <CommandEmpty>Nada encontrado.</CommandEmpty>
-
-          {filteredRoutes.length > 0 && (
-            <CommandGroup heading='Linhas'>
-              {filteredRoutes.map((r) => (
-                <CommandItem
-                  key={r.properties.routeId}
-                  value={`line-${r.properties.routeId}`}
-                  onSelect={() => onSelectRoute(r)}
-                >
-                  <span
-                    className='mr-2 size-2.5 shrink-0 rounded-full'
-                    style={{ background: r.properties.color }}
-                  />
-                  <div className='flex flex-col'>
-                    <span>{r.properties.name}</span>
-                    <span className='text-sml text-muted-foreground'>
-                      {r.properties.description}
-                    </span>
-                  </div>
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          )}
-
-          {filteredStops.length > 0 && (
-            <CommandGroup heading='Estações'>
-              {filteredStops.map((s) => (
-                <CommandItem
-                  key={s.stopId}
-                  value={`stop-${s.stopId}`}
-                  onSelect={() => {
-                    onSelectStop(s);
-                    setQuery("");
-                  }}
-                >
-                  <span className='flex-1'>{s.stopName}</span>
-                  <span className='text-xs text-muted-foreground'>
-                    {s.stopCode}
-                  </span>
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          )}
-        </CommandList>
-      </Command>
+      {body}
     </aside>
   );
 };

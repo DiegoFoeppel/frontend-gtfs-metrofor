@@ -1,112 +1,114 @@
-import {
-  SheetClose,
-  SheetContent,
-  SheetFooter,
-  Sheet,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from "./ui/sheet";
+import { useState } from "react";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "./ui/button";
 import { useStopsByRouteId } from "@/hooks/routes";
 import { useStopsTimetables } from "@/hooks/stops";
 import { SelectDemo } from "./SelectDirection";
-import { useState } from "react";
-// import { cn } from "cn";
-import type { LineInfoProps } from "@/types";
 import { LineItinerary } from "./LineItinerary";
+import { FullScreenLoader } from "./Loading";
+import type { LineInfoProps, LineStopsResponse, StopTimetables } from "@/types";
 
-const LineInfo = ({ line, onOpenChange }: LineInfoProps) => {
+const LineInfo = ({ line, clearLine }: LineInfoProps) => {
   const [direction, setDirection] = useState(0);
-
   const [selectedStopId, setSelectedStopId] = useState<string | null>(null);
 
-  const { data, isLoading } = useStopsByRouteId(
-    line.properties.routeId,
-    direction,
-  );
+  const query = useStopsByRouteId(line.properties.routeId, direction);
+  const { isLoading, isError, error, refetch } = query;
+  const data = query.data as LineStopsResponse | undefined;
 
   const stops = data?.stops ?? [];
   const activeStopId = selectedStopId ?? stops[0]?.stopId ?? null;
 
-  const { data: timetable, isLoading: isLoadingDepartures } =
-    useStopsTimetables(activeStopId, direction);
-
+  const timetableQuery = useStopsTimetables(activeStopId, direction);
+  const timetable = timetableQuery.data as StopTimetables | undefined;
   const departures = timetable?.nextDepartures ?? [];
-
-  // const { data: departures = [], isLoading: loadingDepartures } =
-  //   useStopsTimetables(activeStopId, direction);
 
   const handleDirectionChange = (value: string) => {
     setDirection(Number(value));
     setSelectedStopId(null); // volta para a primeira parada do novo sentido
   };
 
-  if (isLoading) {
-    return <h1>Carregando...</h1>;
-  }
-
-  // const route = route.route;
-  const directions = data.directions ?? [];
-
   const color = line.properties.color;
 
-  return (
-    <Sheet open={!!line} onOpenChange={onOpenChange}>
-      <SheetContent>
-        <SheetHeader
-          className='m-4 p-0 pl-2 border-l-5'
-          style={{ borderLeftColor: color }}
+  const header = (
+    <div
+      className='flex shrink-0 items-start justify-between gap-2 border-l-4 pl-2'
+      style={{ borderLeftColor: color }}
+    >
+      <div className='min-w-0'>
+        <h2 className='text-lg leading-tight font-semibold'>
+          {line.properties.name}
+        </h2>
+        <p className='text-sm text-muted-foreground'>
+          {line.properties.description}
+        </p>
+      </div>
+      <Button
+        size='icon'
+        variant='ghost'
+        onClick={clearLine}
+        aria-label='Voltar para a lista'
+      >
+        <ArrowLeft />
+      </Button>
+    </div>
+  );
+
+  if (isLoading) {
+    return (
+      <>
+        {header}
+        <FullScreenLoader />
+      </>
+    );
+  }
+
+  if (isError) {
+    return (
+      <>
+        {header}
+        <div
+          role='alert'
+          className='space-y-2 rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm'
         >
-          <SheetTitle>
-            <span className=''>{line.properties.name}</span>
-          </SheetTitle>
-          <SheetDescription>
-            Estações da linha {line.properties.description}
-          </SheetDescription>
-        </SheetHeader>
+          <p className='font-medium text-destructive'>
+            Não foi possível carregar as estações.
+          </p>
+          <p className='text-xs text-muted-foreground'>
+            {error instanceof Error ? error.message : "Erro inesperado"}
+          </p>
+          <Button size='sm' variant='outline' onClick={() => refetch()}>
+            Tentar novamente
+          </Button>
+        </div>
+      </>
+    );
+  }
 
-        {/* trocar sentido */}
-        {directions.length > 0 && (
-          <SelectDemo
-            direction={direction}
-            onValueChange={handleDirectionChange}
-            directions={directions}
-          />
-        )}
+  const directions = data?.directions ?? [];
 
-        <LineItinerary
-          stops={stops}
-          color='black'
-          onStopClick={setSelectedStopId}
-          departures={departures}
-          activeStopId={activeStopId}
-          loadingDepartures={isLoadingDepartures}
+  return (
+    <div className='flex min-h-0 flex-1 flex-col'>
+      {header}
+
+      {directions.length > 0 && (
+        <SelectDemo
+          direction={direction}
+          onValueChange={handleDirectionChange}
+          directions={directions}
         />
+      )}
 
-        <SheetFooter>
-          <SheetClose render={<Button variant='outline'>Fechar</Button>} />
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+      <LineItinerary
+        stops={stops}
+        color={color}
+        onStopClick={setSelectedStopId}
+        departures={departures}
+        activeStopId={activeStopId}
+        loadingDepartures={timetableQuery.isLoading}
+      />
+    </div>
   );
 };
 
 export default LineInfo;
-
-// const [direction, setDirection] = useState(0);
-// const [selectedStopId, setSelectedStopId] = useState<string | null>(null);
-
-// const { data: route, isLoading } = useStopsByRouteId(line.route_id, direction);
-
-// const stops = route?.stops ?? [];
-// const activeStopId = selectedStopId ?? stops[0]?.stopId ?? null;
-
-// // só dispara quando já existe uma parada ativa
-// const { data: departures = [], isLoading: loadingDepartures } =
-//   useStopsTimetables(activeStopId, direction);
-
-// const handleDirectionChange = (value: string) => {
-//   setDirection(Number(value));
-//   setSelectedStopId(null); // volta para a primeira parada do novo sentido
-// };

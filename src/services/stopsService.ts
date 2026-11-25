@@ -14,7 +14,7 @@ export async function getStopById(stopId: string) {
 export async function getStopTimetables(stopId: string, directionId?: number) {
   let endpoint = `/api/stops/${stopId}/timetables`;
 
-  if (directionId !== null) {
+  if (directionId != null) {
     endpoint += `?directionId=${directionId}`;
   }
 

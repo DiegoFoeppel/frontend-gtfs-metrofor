@@ -1,5 +1,4 @@
 import { api } from "../api/axios";
-import type { Route } from "../types";
 
 export async function check() {
   const res = await api.get("/api/routes/health");
@@ -19,7 +18,7 @@ export async function getRouteById(routeId: string) {
 
 export async function getStopsByRouteId(routeId: string, directionId: number) {
   let endpoint = `/api/routes/${routeId}/stops`;
-  if (directionId !== null) {
+  if (directionId != null) {
     endpoint += `?directionId=${directionId}`;
   }
   const res = await api.get(endpoint);

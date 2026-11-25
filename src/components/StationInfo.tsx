@@ -1,63 +1,93 @@
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
 import { useStopsTimetables } from "@/hooks/stops";
-import type { StopProps, Timetable } from "@/types";
-import { LoaderPinwheel } from "lucide-react";
+import { useDelayedLoading } from "@/hooks/useDelayedLoading";
+import type { Stop, StopTimetables, Timetable } from "@/types";
+import { FullScreenLoader } from "./Loading";
 
-export function StopInfo({ stop, onOpenChange }: StopProps) {
-  const { data, isLoading } = useStopsTimetables(stop.stopId);
+type Props = { stop: Stop; clearStop: () => void };
 
-  if (isLoading) {
-    return <LoaderPinwheel />;
-  }
-
-  // const timetables = data.timetables;
+export const StopContent = ({ stop, clearStop }: Props) => {
+  const query = useStopsTimetables(stop.stopId);
+  const { isLoading, isError, error, refetch } = query;
+  const data = query.data as StopTimetables | undefined;
+  const showLoader = useDelayedLoading(isLoading, 200);
   const timetables = data?.timetables ?? [];
 
-  return (
-    <Sheet open={!!stop} onOpenChange={onOpenChange}>
-      {/* <SheetTrigger render={<Button variant='outline'>Open</Button>} /> */}
-      <SheetContent>
-        <SheetHeader className='p-4'>
-          <SheetTitle>{stop.stopName}</SheetTitle>
-          <SheetDescription>
-            Horários da estação {stop.stopName}.
-          </SheetDescription>
-        </SheetHeader>
-
-        <div className='overflow-y-auto'>
-          {timetables.length > 0 &&
-            timetables.map((group: Timetable, index: number) => (
-              <div className='mb-2 px-4' key={index}>
-                <h1 className='font-bold text-lg mt-3 mb-1.5'>
-                  Sentido {group.sentido}
-                </h1>
-                <div className='grid grid-cols-4 text-center gap-2'>
-                  {group.horarios.map((hora: string) => (
-                    <p className='rounded-md border text-md p-2' key={hora}>
-                      {hora}
-                    </p>
-                  ))}
-                </div>
-              </div>
-            ))}
-        </div>
-
-        <SheetFooter>
-          {/* <Button type='submit'>Save changes</Button> */}
-          <SheetClose render={<Button variant='outline'>Fechar</Button>} />
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+  const header = (
+    <div className='flex shrink-0 items-center gap-2'>
+      <Button
+        variant='ghost'
+        size='icon'
+        onClick={clearStop}
+        aria-label='Voltar'
+      >
+        <ArrowLeft />
+      </Button>
+      <div className='min-w-0'>
+        <h2 className='text-lg leading-tight font-semibold'>{stop.stopName}</h2>
+        <p className='text-sm text-muted-foreground'>Horários da estação</p>
+      </div>
+    </div>
   );
-}
 
-export default StopInfo;
+  let body;
+  if (isError) {
+    body = (
+      <div
+        role='alert'
+        className='space-y-2 rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm'
+      >
+        <p className='font-medium text-destructive'>
+          Não foi possível carregar os horários.
+        </p>
+        <p className='text-xs text-muted-foreground'>
+          {error instanceof Error ? error.message : "Erro inesperado"}
+        </p>
+        <Button size='sm' variant='outline' onClick={() => refetch()}>
+          Tentar novamente
+        </Button>
+      </div>
+    );
+  } else if (isLoading) {
+    // < 200ms: não mostra nada para evitar flash do spinner
+    body = showLoader ? <FullScreenLoader /> : null;
+  } else if (timetables.length === 0) {
+    body = (
+      <p className='py-6 text-center text-sm text-muted-foreground'>
+        Nenhum horário previsto para esta estação hoje.
+      </p>
+    );
+  } else {
+    body = (
+      <div className='min-h-0 flex-1 overflow-y-auto scrollbar-none'>
+        {timetables.map((group: Timetable) => (
+          <section key={group.directionId} className='mb-3'>
+            <h3 className='mt-2 mb-1.5 text-base font-semibold'>
+              Sentido {group.sentido}
+            </h3>
+            <div className='grid grid-cols-4 gap-2 text-center'>
+              {group.horarios.map((hora) => (
+                <p
+                  className='rounded-md border p-2 text-sm tabular-nums'
+                  key={hora}
+                >
+                  {hora}
+                </p>
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className='flex min-h-0 flex-1 flex-col gap-2'>
+      {header}
+      {body}
+    </div>
+  );
+};
+
+export default StopContent;

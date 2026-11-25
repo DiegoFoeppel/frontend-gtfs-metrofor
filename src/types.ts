@@ -28,11 +28,6 @@ export type Route = {
   routeTextColor: string;
 };
 
-export type StopProps = {
-  stop: Stop;
-  onOpenChange: () => void;
-};
-
 export type Timetable = {
   directionId: number;
   sentido: string;
@@ -52,11 +47,6 @@ export type SelectProps = {
   onValueChange: (value: string) => void;
 };
 
-export type LineInfoProps = {
-  line: CompleteRoute;
-  onOpenChange: () => void;
-};
-
 export type CompleteRoute = {
   type: string;
   id: string;
@@ -70,5 +60,28 @@ export type CompleteRoute = {
     routeId: string;
     color: string;
     cityId: string;
+    type: number;
   };
+};
+
+export type LineInfoProps = {
+  line: CompleteRoute;
+  clearLine: () => void;
+};
+
+export type StopTimetables = {
+  timetables?: Timetable[];
+  nextDepartures?: string[];
+};
+
+export type LineStopsResponse = {
+  stops: Stop[];
+  directions: Direction[];
+};
+
+export type CameraPadding = {
+  top: number;
+  bottom: number;
+  left: number;
+  right: number;
 };

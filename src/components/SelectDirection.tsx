@@ -18,13 +18,12 @@ export function SelectDemo({
 
   return (
     <Select
-      items={directions}
+      items={directions.map((d) => ({ label: `Sentido ${d.label}`, value: d.id }))}
       value={direction}
-      onValueChange={(value) => onValueChange(value)}
+      onValueChange={(value) => onValueChange(String(value))}
     >
-      <SelectTrigger className='w-full max-w-64 mx-4'>
-        {/* <SelectValue /> */}
-        <SelectValue>Sentido {dir.label}</SelectValue>
+      <SelectTrigger className='my-3 w-full' aria-label='Sentido'>
+        <SelectValue>Sentido {dir?.label ?? ""}</SelectValue>
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>
