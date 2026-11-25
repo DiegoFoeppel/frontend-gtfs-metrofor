@@ -8,6 +8,7 @@ type Props = {
   departures: string[];
   activeStopId: string | null;
   loadingDepartures: boolean;
+  noService?: boolean;
 };
 
 export function LineItinerary({
@@ -17,6 +18,7 @@ export function LineItinerary({
   departures,
   activeStopId,
   loadingDepartures,
+  noService = false,
 }: Props) {
   return (
     <ol className='relative min-h-0 flex-1 overflow-y-auto scrollbar-none'>
@@ -74,7 +76,7 @@ export function LineItinerary({
                         </span>
                       ))
                     ) : (
-                      <span>Sem mais partidas hoje</span>
+                      <span>{noService ? 'Sem operação aos domingos' : 'Sem mais partidas hoje'}</span>
                     )}
                   </div>
                 </div>

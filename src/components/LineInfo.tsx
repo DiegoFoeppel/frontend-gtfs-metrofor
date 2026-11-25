@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { ArrowLeft } from "lucide-react";
 import { Button } from "./ui/button";
 import { useStopsByRouteId } from "@/hooks/routes";
 import { useStopsTimetables } from "@/hooks/stops";
 import { SelectDemo } from "./SelectDirection";
 import { LineItinerary } from "./LineItinerary";
+import { TravelTime } from "./TravelTime";
 import { FullScreenLoader } from "./Loading";
+import { PanelHeader } from "./PanelHeader";
+import { hasServiceToday } from "@/lib/time";
 import type { LineInfoProps, LineStopsResponse, StopTimetables } from "@/types";
 
 const LineInfo = ({ line, clearLine }: LineInfoProps) => {
@@ -31,27 +33,13 @@ const LineInfo = ({ line, clearLine }: LineInfoProps) => {
   const color = line.properties.color;
 
   const header = (
-    <div
-      className='flex shrink-0 items-start justify-between gap-2 border-l-4 pl-2'
-      style={{ borderLeftColor: color }}
-    >
-      <div className='min-w-0'>
-        <h2 className='text-lg leading-tight font-semibold'>
-          {line.properties.name}
-        </h2>
-        <p className='text-sm text-muted-foreground'>
-          {line.properties.description}
-        </p>
-      </div>
-      <Button
-        size='icon'
-        variant='ghost'
-        onClick={clearLine}
-        aria-label='Voltar para a lista'
-      >
-        <ArrowLeft />
-      </Button>
-    </div>
+    <PanelHeader
+      title={line.properties.name}
+      subtitle={line.properties.description}
+      color={color}
+      onBack={clearLine}
+      backLabel='Voltar para a lista'
+    />
   );
 
   if (isLoading) {
@@ -99,6 +87,19 @@ const LineInfo = ({ line, clearLine }: LineInfoProps) => {
         />
       )}
 
+      <TravelTime
+
+        key={direction}
+
+        routeId={line.properties.routeId}
+
+        direction={direction}
+
+        stops={stops}
+
+      />
+
+
       <LineItinerary
         stops={stops}
         color={color}
@@ -106,6 +107,7 @@ const LineInfo = ({ line, clearLine }: LineInfoProps) => {
         departures={departures}
         activeStopId={activeStopId}
         loadingDepartures={timetableQuery.isLoading}
+        noService={!hasServiceToday()}
       />
     </div>
   );

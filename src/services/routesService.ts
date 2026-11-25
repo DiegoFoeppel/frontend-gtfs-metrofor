@@ -28,3 +28,22 @@ export async function getStopsByRouteId(routeId: string, directionId: number) {
 //   const res = await api.get(`/api/routes/stops`);
 //   return res.data;
 // }
+
+export type TravelTime = {
+  trips: number;
+  minMinutes: number;
+  minutes: number;
+  maxMinutes: number;
+};
+
+export async function getTravelTime(
+  routeId: string,
+  from: string,
+  to: string,
+  directionId: number,
+): Promise<TravelTime> {
+  const res = await api.get(`/api/routes/${routeId}/travel-time`, {
+    params: { from, to, directionId },
+  });
+  return res.data;
+}
