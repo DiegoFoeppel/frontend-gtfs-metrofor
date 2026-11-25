@@ -1,4 +1,7 @@
 import { useMemo, useState } from "react";
+import { LocateFixed } from "lucide-react";
+import { Button } from "./ui/button";
+import { useNearestStop } from "@/hooks/useNearestStop";
 import {
   Select,
   SelectContent,
@@ -43,6 +46,7 @@ const ListContent = ({
   onCityChange,
 }: Props) => {
   const [query, setQuery] = useState("");
+  const { locate, isLocating, error: locationError } = useNearestStop(stops);
   const q = normalize(query.trim());
 
   const cityId = selectCities.find((c) => c.value === city)?.id;
@@ -94,7 +98,26 @@ const ListContent = ({
         </SelectContent>
       </Select>
 
-      <Command shouldFilter={false} className='min-h-0 flex-1 bg-transparent'>
+      <div className='space-y-1'>
+        <Button
+          variant='outline'
+          className='w-full'
+          disabled={isLocating}
+          onClick={() => {
+            locate(({ stop }) => onSelectStop(stop));
+          }}
+        >
+          <LocateFixed />
+          {isLocating ? 'Localizando...' : 'Estação perto de mim'}
+        </Button>
+        {locationError && (
+          <p role='alert' className='text-xs text-destructive'>
+            {locationError}
+          </p>
+        )}
+      </div>
+
+      <Command shouldFilter={false} className='min-h-0 flex-1 bg-transparent p-0 [&_[data-slot=command-input-wrapper]]:p-0'>
         <CommandInput
           placeholder='Buscar linha ou estação...'
           value={query}
