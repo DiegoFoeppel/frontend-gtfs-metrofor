@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import { SidebarIcon } from "lucide-react";
 import { Map } from "@/components/ui/map";
 import { cities } from "@/data";
 import { useStops } from "@/hooks/stops";
@@ -35,7 +34,6 @@ export function MapExample() {
 
   const routes = (fullRoutes?.features ?? []) as unknown as CompleteRoute[];
 
-  console.log("routes", routes);
   // Área do mapa coberta pelo painel, para a câmera centralizar no espaço livre.
   const padding = useMemo<CameraPadding>(() => {
     if (isMobile) {
@@ -131,22 +129,8 @@ export function MapExample() {
       />
 
       <div className='absolute top-[max(0.75rem,env(safe-area-inset-top))] right-3 z-[60]'>
-
         <ThemeToggle />
-
       </div>
-
-
-      {!isOpen && !isMobile && (
-        <Button
-          size='icon'
-          onClick={() => setIsOpen(true)}
-          aria-label='Abrir painel'
-          className='absolute top-[max(0.75rem,env(safe-area-inset-top))] left-3 z-10 shadow-md'
-        >
-          <SidebarIcon />
-        </Button>
-      )}
     </div>
   );
 }

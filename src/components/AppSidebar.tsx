@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { X } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "cn";
 import { StopContent } from "./StationInfo";
 import LineInfo from "./LineInfo";
@@ -86,26 +86,31 @@ const AppSidebar = ({ open, onOpenChange, ...content }: Props) => {
   }
 
   return (
-    <aside
-      aria-label='Painel de linhas e estações'
-      inert={!open}
+    <div
       className={cn(
-        "absolute inset-y-0 left-0 z-10 flex w-96 flex-col gap-3 border-r bg-background p-4 shadow-xl transition-transform duration-300",
-        !open && "-translate-x-full",
+        'absolute inset-y-0 left-0 z-10 w-96 transition-transform duration-300',
+        !open && '-translate-x-full',
       )}
     >
-      <div className='flex shrink-0 justify-end'>
-        <Button
-          size='icon'
-          variant='ghost'
-          onClick={() => onOpenChange(false)}
-          aria-label='Fechar painel'
-        >
-          <X />
-        </Button>
-      </div>
-      {body}
-    </aside>
+      <aside
+        aria-label='Painel de linhas e estações'
+        inert={!open}
+        className='flex h-full flex-col gap-3 border-r bg-background p-4 shadow-xl'
+      >
+        {body}
+      </aside>
+
+      {/* Alça na borda do painel: abre/recolhe e fica visível mesmo fechado. */}
+      <Button
+        variant='outline'
+        onClick={() => onOpenChange(!open)}
+        aria-label={open ? 'Recolher painel' : 'Abrir painel'}
+        aria-expanded={open}
+        className='absolute top-1/2 -right-6 h-14 w-6 -translate-y-1/2 rounded-l-none border-l-0 bg-background px-0 shadow-md'
+      >
+        {open ? <ChevronLeft /> : <ChevronRight />}
+      </Button>
+    </div>
   );
 };
 
